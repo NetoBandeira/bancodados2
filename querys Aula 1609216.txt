@@ -193,7 +193,7 @@ $$
 
 begin
 	
-	select posinicial
+	perform *
 	from Participacao
 	where idCorrida = new.idCorrida AND (posinicial = new.posinicial OR posfinal = new.posfinal);
 	
