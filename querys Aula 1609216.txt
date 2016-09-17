@@ -1,0 +1,232 @@
+CREATE TABLE EQUIPE (
+	idEquipe serial NOT NULL,
+	Nome varchar(50) NOT NULL,
+	AnoFundacao integer NOT NULL,
+	CONSTRAINT pk_idEquipe PRIMARY KEY (idEquipe)
+
+);
+
+CREATE TABLE PILOTO (
+	idPiloto serial NOT NULL,
+	Nome varchar(50) NOT NULL,
+	Pais varchar(15) NOT NULL,
+	idEquipe integer NOT NULL,
+	Pontos integer NOT NULL,
+	CONSTRAINT pk_idPiloto PRIMARY KEY (idPiloto)
+
+);
+CREATE TABLE CIRCUITO (
+	idCircuito serial NOT NULL,
+	Nome varchar(50) NOT NULL,
+	extensao integer NOT NULL,
+	Pais varchar(50) NOT NULL,
+	CONSTRAINT pk_idCircuito PRIMARY KEY (idCircuito)
+
+);
+CREATE TABLE CORRIDA (
+	idCorrida serial NOT NULL,
+	NomeGP varchar(50) NOT NULL,
+	Data date NOT NULL,
+	idCircuito integer NOT NULL,
+	CONSTRAINT pk_idCorrida PRIMARY KEY (idCorrida)
+	
+
+);
+CREATE TABLE PARTICIPACAO (
+	idParticipacao serial NOT NULL,
+	idPiloto integer NOT NULL,
+	idCorrida integer NOT NULL,
+	PosInicial integer NOT NULL,
+	PosFinal integer NOT NULL,
+	CONSTRAINT pk_idParticipacao PRIMARY KEY (idParticipacao)
+	
+
+);
+
+-- definição de FKs
+ALTER TABLE CORRIDA
+ADD CONSTRAINT fk_circuito_corrida FOREIGN KEY (idCircuito) REFERENCES CIRCUITO (idCircuito) ON UPDATE CASCADE ON DELETE NO ACTION;
+ALTER TABLE PARTICIPACAO
+ADD CONSTRAINT fk_piloto_participacao FOREIGN KEY (idPiloto) REFERENCES PILOTO (idPiloto) ON UPDATE CASCADE ON DELETE NO ACTION,
+ADD CONSTRAINT fk_corrida_participacao FOREIGN KEY (idCorrida) REFERENCES CORRIDA (idCorrida) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('William Mangoni', 'Brasil', 1, 15);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Celestino Neto', 'Brasil', 1, 16);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Jofrey Bornam', 'Alemanha', 2, 10);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('John Mayer', 'EUA', 3, 10);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Mark coneegan', 'EUA', 3, 11);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Aubinan Rubinam', 'Escandinavia', 4, 20);
+insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Tobias Emet', 'Canada', 5, 15);
+
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Melbourne', 1300, 'AUSTRÁLIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Sakhir', 1420, 'ARABIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Shanghai', 1100, 'CHINA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Sochi', 1650, 'RUSSIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Catalunha', 2010, 'ESPANHA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Monte Carlo', 1950, 'MÔNACO');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Montréal', 1765, 'CANADA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Spielberg - RedBull Ring', 1300, 'ALEMANHA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Silverstone', 1005, 'GRAN BRETANHA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Spa-Francorchamps', 1305, 'FRANÇA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Monza', 1455, 'ITÁLIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Singapore', 1660, 'SINGAPURA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Kuala Lumpur', 1600, 'MALASIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Suzuka', 1477, 'JAPÃO');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Austin', 1390, 'EUA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Mexico City', 1240, 'MEXICO');
+
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Melbourne', '2016-06-22', 1);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Sakhir', '2016-04-06', 2);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Shanghai', '2016-07-18', 3);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Sochi', '2016-08-16', 4);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Catalunha', '2016-04-12', 5);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Monte Carlo', '2016-06-10', 6);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Montréal', '2016-08-16', 7);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Spielberg - RedBull Ring', '2016-08-16', 8);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Silverstone', '2016-08-10', 9);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Spa-Francorchamps', '2016-06-17', 10);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Monza', '2016-08-16', 11);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Singapore', '2016-08-05', 12);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Kuala Lumpur', '2016-05-16', 13);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Suzuka', '2016-06-14', 14);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Austin', '2016-05-16', 15);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Mexico City', '2016-04-01', 16);
+
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (1, 5, 16, 1);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (7, 16, 8, 2);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (5, 12, 7, 3);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (5, 8, 2, 4);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (2, 4, 5, 5);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (6, 2, 9, 6);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (1, 10, 11, 7);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (2, 3, 15, 8);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (6, 15, 6, 9);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (2, 6, 13, 10);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (3, 9, 14, 11);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (4, 14, 12, 12);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (3, 7, 1, 13);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (1, 1, 3, 14);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (2, 13, 4, 15);
+insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (4, 11, 10, 16);
+
+
+--Criar uma visão que retorne os pilotos que venceram corridas no mesmo país
+--onde nasceram. Mostrar as colunas nome-do-piloto, nome-do-circuito, pais, data-da-corrida.
+create view VenceuPaisOrigem (NomePiloto,NomeCircuito,Pais, DataCorrida)as
+select Piloto.Nome, Circuito.Nome, Piloto.Pais, Corrida.Data
+from Circuito JOIN Corrida ON Circuito.idCircuito = Corrida.idCircuito
+JOIN Participacao ON Corrida.idCorrida = Participacao.idCorrida
+JOIN Piloto on Piloto.idPiloto = Participacao.idPiloto
+where Piloto.Pais = Circuito.Pais AND Participacao.PosFinal = 1;
+
+--Criar um procedimento que permita criar uma nova equipe e já cadastrar seus
+--pilotos (quantos forem necessários). Deve-se informar o nome da equipe,
+--ano de fundação e os nomes dos pilotos. Caso algum dos pilotos já esteja
+--cadastrado, deve-se somente trocar o vínculo.
+
+create or replace function novaEquipe(varchar,integer,varchar[])
+returns void as
+$$
+declare
+
+	_nomePiloto varchar;
+	_idEquipe integer;
+	_idPiloto integer;
+
+begin
+	
+	insert into Equipe (nome,anofundacao)
+	values($1,$2);
+
+	SELECT MAX(idEquipe) into _idEquipe
+	FROM Equipe;	
+
+	foreach _nomePiloto in array $3
+	loop
+		select idPiloto into _idPiloto
+		from Piloto
+		where Nome = _nomePiloto;
+		
+		if not found then
+			insert into Piloto(nome, pais,idEquipe,pontos)
+			values(_nomePiloto,'',_idEquipe,0);
+		end if;
+
+		update Piloto
+		set idEquipe = _idEquipe;
+		
+	end loop;
+end;
+$$language plpgsql
+
+--Criar um procedimento que retorne,
+--dado um nome de piloto, os nomes dos
+--circuitos nos quais o mesmo venceu, bem
+--como a data em que isso ocorreu.
+create or replace function Venci(varchar)
+returns table(nomeCircuito varchar, data date)as
+$$
+declare
+	_idEsporte integer;
+begin
+	
+	return query
+		select Circuito.Nome, Corrida.Data
+		from Circuito join Corrida on Circuito.idCircuito = Corrida.idCircuito
+		join participacao on participacao.idCorrida = corrida.idCorrida
+		join piloto on piloto.idpiloto = participacao.idpiloto
+		where participacao.posfinal = 1 AND Piloto.Nome = $1;
+
+	return;
+
+end;
+$$language plpgsql;
+
+--Criar um gatilho que impeça que, numa mesma corrida
+--dois pilotos diferentes saiam da mesma posição inicial
+--ou cheguem na mesma posição final.
+--GATILHO BEFORE
+
+create or replace function impedePosicao()
+returns trigger as
+$$
+
+begin
+	
+	select posinicial
+	from Participacao
+	where idCorrida = new.idCorrida AND (posinicial = new.posinicial OR posfinal = new.posfinal);
+	
+	if not found then	
+		--insert into participacao(idpiloto,idcorrida,posinicial,posfinal)
+		--values(new.idpiloto,new.idcorrida,new.posinicial,new.posfinal);
+		return new;
+	end if;
+
+	return null;
+	
+end;
+$$language plpgsql;
+
+create trigger trg_impedeMesmaPosicao before insert or update on Participacao
+for each row execute procedure impedePosicao();
+
+
+--Criar um gatilho que atribua, para um piloto participante de corrida,
+--uma pontuação com base na sua posição final. Se o piloto chegar em primeiro
+--lugar na corrida, deve-se acrescentar 10 pontos a ele. Se chegar em segundo,
+--8 pontos e assim sucessivamente. Somente os 5 primeiros colocados pontuam.
+create or replace function atualiza_pontos()
+returns trigger as
+$$
+begin
+	if new.posfinal <= 5 then
+		update piloto
+		set pontos = pontos + 10 - 2 * (new.posfinal - 1)
+		where idpiloto = new.idpiloto;
+	end if;
+	return New;
+end;
+$$language plpgsql;
+create trigger trg_pontuacao before update of pontos on piloto
+for each row execute procedure atualiza_pontos();
