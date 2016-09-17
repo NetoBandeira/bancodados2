@@ -43,7 +43,7 @@ CREATE TABLE PARTICIPACAO (
 
 );
 
--- definiÁ„o de FKs
+-- defini√ß√£o de FKs
 ALTER TABLE CORRIDA
 ADD CONSTRAINT fk_circuito_corrida FOREIGN KEY (idCircuito) REFERENCES CIRCUITO (idCircuito) ON UPDATE CASCADE ON DELETE NO ACTION;
 ALTER TABLE PARTICIPACAO
@@ -58,20 +58,20 @@ insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Mark coneegan', 'EUA'
 insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Aubinan Rubinam', 'Escandinavia', 4, 20);
 insert into piloto (Nome, Pais, idEquipe, Pontos) VALUES ('Tobias Emet', 'Canada', 5, 15);
 
-insert into CIRCUITO (nome, extensao, pais) VALUES ('Melbourne', 1300, 'AUSTR¡LIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Melbourne', 1300, 'AUSTR√ÅLIA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Sakhir', 1420, 'ARABIA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Shanghai', 1100, 'CHINA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Sochi', 1650, 'RUSSIA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Catalunha', 2010, 'ESPANHA');
-insert into CIRCUITO (nome, extensao, pais) VALUES ('Monte Carlo', 1950, 'M‘NACO');
-insert into CIRCUITO (nome, extensao, pais) VALUES ('MontrÈal', 1765, 'CANADA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Monte Carlo', 1950, 'M√îNACO');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Montr√©al', 1765, 'CANADA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Spielberg - RedBull Ring', 1300, 'ALEMANHA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Silverstone', 1005, 'GRAN BRETANHA');
-insert into CIRCUITO (nome, extensao, pais) VALUES ('Spa-Francorchamps', 1305, 'FRAN«A');
-insert into CIRCUITO (nome, extensao, pais) VALUES ('Monza', 1455, 'IT¡LIA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Spa-Francorchamps', 1305, 'FRAN√áA');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Monza', 1455, 'IT√ÅLIA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Singapore', 1660, 'SINGAPURA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Kuala Lumpur', 1600, 'MALASIA');
-insert into CIRCUITO (nome, extensao, pais) VALUES ('Suzuka', 1477, 'JAP√O');
+insert into CIRCUITO (nome, extensao, pais) VALUES ('Suzuka', 1477, 'JAP√ÉO');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Austin', 1390, 'EUA');
 insert into CIRCUITO (nome, extensao, pais) VALUES ('Mexico City', 1240, 'MEXICO');
 
@@ -81,7 +81,7 @@ insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - S
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Sochi', '2016-08-16', 4);
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Catalunha', '2016-04-12', 5);
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Monte Carlo', '2016-06-10', 6);
-insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - MontrÈal', '2016-08-16', 7);
+insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Montr√©al', '2016-08-16', 7);
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Spielberg - RedBull Ring', '2016-08-16', 8);
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Silverstone', '2016-08-10', 9);
 insert into CORRIDA (NomeGP, Data, idCircuito) VALUES ('GRAND PRIX 2016 - F1 - Spa-Francorchamps', '2016-06-17', 10);
@@ -110,7 +110,7 @@ insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (2, 
 insert into PARTICIPACAO (idPiloto, idCorrida, PosInicial, PosFinal) VALUES (4, 11, 10, 16);
 
 
---Criar uma vis„o que retorne os pilotos que venceram corridas no mesmo paÌs
+--Criar uma vis√£o que retorne os pilotos que venceram corridas no mesmo pa√≠s
 --onde nasceram. Mostrar as colunas nome-do-piloto, nome-do-circuito, pais, data-da-corrida.
 create view VenceuPaisOrigem (NomePiloto,NomeCircuito,Pais, DataCorrida)as
 select Piloto.Nome, Circuito.Nome, Piloto.Pais, Corrida.Data
@@ -119,10 +119,10 @@ JOIN Participacao ON Corrida.idCorrida = Participacao.idCorrida
 JOIN Piloto on Piloto.idPiloto = Participacao.idPiloto
 where Piloto.Pais = Circuito.Pais AND Participacao.PosFinal = 1;
 
---Criar um procedimento que permita criar uma nova equipe e j· cadastrar seus
---pilotos (quantos forem necess·rios). Deve-se informar o nome da equipe,
---ano de fundaÁ„o e os nomes dos pilotos. Caso algum dos pilotos j· esteja
---cadastrado, deve-se somente trocar o vÌnculo.
+--Criar um procedimento que permita criar uma nova equipe e j√° cadastrar seus
+--pilotos (quantos forem necess√°rios). Deve-se informar o nome da equipe,
+--ano de funda√ß√£o e os nomes dos pilotos. Caso algum dos pilotos j√° esteja
+--cadastrado, deve-se somente trocar o v√≠nculo.
 
 create or replace function novaEquipe(varchar,integer,varchar[])
 returns void as
@@ -182,9 +182,9 @@ begin
 end;
 $$language plpgsql;
 
---Criar um gatilho que impeÁa que, numa mesma corrida
---dois pilotos diferentes saiam da mesma posiÁ„o inicial
---ou cheguem na mesma posiÁ„o final.
+--Criar um gatilho que impe√ßa que, numa mesma corrida
+--dois pilotos diferentes saiam da mesma posi√ß√£o inicial
+--ou cheguem na mesma posi√ß√£o final.
 --GATILHO BEFORE
 
 create or replace function impedePosicao()
@@ -193,17 +193,15 @@ $$
 
 begin
 	
-	select posinicial
+	PERFORM *
 	from Participacao
 	where idCorrida = new.idCorrida AND (posinicial = new.posinicial OR posfinal = new.posfinal);
 	
-	if not found then	
-		--insert into participacao(idpiloto,idcorrida,posinicial,posfinal)
-		--values(new.idpiloto,new.idcorrida,new.posinicial,new.posfinal);
-		return new;
-	end if;
+	IF not found then	
+		return NEW;
+	end IF;
 
-	return null;
+	return NULL;
 	
 end;
 $$language plpgsql;
@@ -213,7 +211,7 @@ for each row execute procedure impedePosicao();
 
 
 --Criar um gatilho que atribua, para um piloto participante de corrida,
---uma pontuaÁ„o com base na sua posiÁ„o final. Se o piloto chegar em primeiro
+--uma pontua√ß√£o com base na sua posi√ß√£o final. Se o piloto chegar em primeiro
 --lugar na corrida, deve-se acrescentar 10 pontos a ele. Se chegar em segundo,
 --8 pontos e assim sucessivamente. Somente os 5 primeiros colocados pontuam.
 create or replace function atualiza_pontos()
