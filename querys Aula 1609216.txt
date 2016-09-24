@@ -228,3 +228,149 @@ end;
 $$language plpgsql;
 create trigger trg_pontuacao before update of pontos on piloto
 for each row execute procedure atualiza_pontos();
+
+---------------------
+
+-----aula 23/09/2016 ----
+
+CREATE TABLE USUARIO (
+	idUsuario serial NOT NULL,
+	Nome varchar(50) NOT NULL,
+	CONSTRAINT pk_idUsuario PRIMARY KEY (idUsuario)
+);
+INSERT INTO USUARIO (nome) VALUES ('William'),('Celestino'),('Fábio'),('Daniel'),('Eduardo'),('Maurício'),('José'),('Roberto'),('João');
+
+CREATE TABLE LIVRO (
+	idLivro serial NOT NULL,
+	Titulo varchar(50) NOT NULL,
+	CONSTRAINT pk_idLivro PRIMARY KEY (idLivro)
+);
+
+INSERT INTO LIVRO (Titulo) VALUES
+('Refatoração - Martin Fowler'),
+('Design Patterns - GOF'),
+('Estatísticas avançadas para SW - Roberval'),
+('Governança em TI - Isabela Nobre'),
+('Banco de Dados Oracle - MS canval'),
+('Modelagem de Software - Suselo Gros'),
+('PHP para Leigos - Pablo Diogo'),
+('Java Avançado - Lucas de Lone'),
+('Mysql e PHP - Daniel Canvaro');
+
+CREATE TABLE EMPRESTIMO (
+	idUsuario integer NOT NULL,
+	idLivro integer NOT NULL,
+	DataRetirada date NOT NULL
+);
+
+INSERT INTO EMPRESTIMO (idUsuario, idLivro, DataRetirada) VALUES
+(2, 5, '2016-09-01'),
+(6, 1, '2016-09-12'),
+(8, 3, '2016-09-03'),
+(9, 2, '2016-09-20'),
+(3, 4, '2016-09-21'),
+(5, 6, '2016-09-16'),
+(1, 9, '2016-09-14'),
+(2, 7, '2016-09-11'),
+(2, 8, '2016-09-20');
+
+CREATE TABLE HISTORICO (
+	idHistorico integer NOT NULL,
+	idUsuario integer NOT NULL,
+	idLivro integer NOT NULL,
+	DataDevolucao date NOT NULL,
+	DiasAtraso date NOT NULL,
+	CONSTRAINT pk_idHistorico PRIMARY KEY (idHistorico);
+);
+
+ALTER TABLE EMPRESTIMO
+ADD CONSTRAINT fk_emprestimo_usuario FOREIGN KEY (idUsuario)
+REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
+ADD CONSTRAINT fk_emprestimo_livro FOREIGN KEY (idLivro)
+REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+ALTER TABLE HISTORICO
+ADD CONSTRAINT fk_historico_usuario FOREIGN KEY (idUsuario)
+REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
+ADD CONSTRAINT fk_historico_livro FOREIGN KEY (idLivro)
+REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+------letra b-------
+
+CREATE OR REPLACE FUNCTION DateDiff (start_t TIMESTAMP, end_t TIMESTAMP) 
+RETURNS INT AS $$
+DECLARE
+     diff_interval INTERVAL; 
+     diff INT = 0;
+BEGIN
+     diff_interval = end_t - start_t;
+ 
+     diff = diff + DATE_PART('day', diff_interval);
+ 
+     RETURN diff;
+END;
+$$ LANGUAGE plpgsql;
+
+   select DateDiff('2016-09-01', '2016-07-01');
+
+------letra d 1-------
+
+
+create or replace function limiteEmprestimo()
+returns trigger as
+$$
+declare
+	_number integer;
+begin
+	
+	SELECT count(*) into _number
+	from emprestimo
+	where idUsuario = new.idUsuario;
+	
+	IF _number < 3 then
+		return NEW;
+	end IF;
+
+	return NULL;
+	
+end;
+$$language plpgsql;
+
+create trigger trg_limiteEmprestimo before insert on emprestimo
+for each row execute procedure limiteEmprestimo();
+
+------letra d 2----------
+
+create or replace function atualizaHistorico()
+returns trigger as
+$$
+declare
+	_dateValue integer;
+begin
+	select DateDiff(New.DataRetirada, NOW()) into _dateValue;
+		
+	INSERT INTO HISTORICO (idUsuario, idLivro, DataDevolucao, DiasAtraso)
+	VALUES (New.idUsuario, New.idLivro, NOW(), _dateValue);
+	
+	return NEW;
+	
+end;
+$$language plpgsql;
+
+create trigger trg_atualizaHistorico before delete on emprestimo
+for each row execute procedure atualizaHistorico();
+
+-------letra c----------
+CREATE OR REPLACE FUNCTION ListaAtraso () 
+RETURNS table (idUsuario integer, idLivro integer) AS $$
+
+BEGIN
+     return query
+ 
+     RETURN diff;
+END;
+$$ LANGUAGE plpgsql;
+
+   select DateDiff('2016-09-01', '2016-07-01');
+
+
