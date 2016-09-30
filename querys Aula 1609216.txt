@@ -234,143 +234,226 @@ for each row execute procedure atualiza_pontos();
 -----aula 23/09/2016 ----
 
 CREATE TABLE USUARIO (
-	idUsuario serial NOT NULL,
-	Nome varchar(50) NOT NULL,
-	CONSTRAINT pk_idUsuario PRIMARY KEY (idUsuario)
-);
-INSERT INTO USUARIO (nome) VALUES ('William'),('Celestino'),('Fábio'),('Daniel'),('Eduardo'),('Maurício'),('José'),('Roberto'),('João');
+ 	idUsuario serial NOT NULL,
+ 	Nome varchar(50) NOT NULL,
+ 	CONSTRAINT pk_idUsuario PRIMARY KEY (idUsuario)
+ );
+ INSERT INTO USUARIO (nome) VALUES ('William'),('Celestino'),('Fábio'),('Daniel'),('Eduardo'),('Maurício'),('José'),('Roberto'),('João');
+ 
+ CREATE TABLE LIVRO (
+ 	idLivro serial NOT NULL,
+ 	Titulo varchar(50) NOT NULL,
+ 	CONSTRAINT pk_idLivro PRIMARY KEY (idLivro)
+ );
+ 
+ INSERT INTO LIVRO (Titulo) VALUES
+ ('Refatoração - Martin Fowler'),
+ ('Design Patterns - GOF'),
+ ('Estatísticas avançadas para SW - Roberval'),
+ ('Governança em TI - Isabela Nobre'),
+ ('Banco de Dados Oracle - MS canval'),
+ ('Modelagem de Software - Suselo Gros'),
+ ('PHP para Leigos - Pablo Diogo'),
+ ('Java Avançado - Lucas de Lone'),
+ ('Mysql e PHP - Daniel Canvaro');
+ 
+ CREATE TABLE EMPRESTIMO (
+ 	idUsuario integer NOT NULL,
+ 	idLivro integer NOT NULL,
+ 	DataRetirada date NOT NULL
+ );
+ 
+ INSERT INTO EMPRESTIMO (idUsuario, idLivro, DataRetirada) VALUES
+ (2, 5, '2016-09-01'),
+ (6, 1, '2016-09-12'),
+ (8, 3, '2016-09-03'),
+ (9, 2, '2016-09-20'),
+ (3, 4, '2016-09-21'),
+ (5, 6, '2016-09-16'),
+ (1, 9, '2016-09-14'),
+ (2, 7, '2016-09-11'),
+ (2, 8, '2016-09-20');
 
-CREATE TABLE LIVRO (
-	idLivro serial NOT NULL,
-	Titulo varchar(50) NOT NULL,
-	CONSTRAINT pk_idLivro PRIMARY KEY (idLivro)
-);
 
-INSERT INTO LIVRO (Titulo) VALUES
-('Refatoração - Martin Fowler'),
-('Design Patterns - GOF'),
-('Estatísticas avançadas para SW - Roberval'),
-('Governança em TI - Isabela Nobre'),
-('Banco de Dados Oracle - MS canval'),
-('Modelagem de Software - Suselo Gros'),
-('PHP para Leigos - Pablo Diogo'),
-('Java Avançado - Lucas de Lone'),
-('Mysql e PHP - Daniel Canvaro');
+ 
+ CREATE TABLE HISTORICO (
+ 	idHistorico serial NOT NULL,
+ 	idUsuario integer NOT NULL,
+ 	idLivro integer NOT NULL,
+ 	DataDevolucao date NOT NULL,
+ 	DiasAtraso integer NOT NULL,
+ 	CONSTRAINT pk_idHistorico PRIMARY KEY (idHistorico)
+ );
+ 
+ ALTER TABLE EMPRESTIMO
+ ADD CONSTRAINT fk_emprestimo_usuario FOREIGN KEY (idUsuario)
+ REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
+ ADD CONSTRAINT fk_emprestimo_livro FOREIGN KEY (idLivro)
+ REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
+ 
+ ALTER TABLE HISTORICO
+ ADD CONSTRAINT fk_historico_usuario FOREIGN KEY (idUsuario)
+ REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
+ ADD CONSTRAINT fk_historico_livro FOREIGN KEY (idLivro)
+ REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
+ 
+ ------letra b-------
+ --Construa um procedimento que,
+ --recebendo duas datas, retorne a diferença entre elas em dias;
+ CREATE OR REPLACE FUNCTION DateDiff (start_t TIMESTAMP, end_t TIMESTAMP) 
+ RETURNS INT AS $$
+ DECLARE
+      diff_interval INTERVAL; 
+      diff INT = 0;
+ BEGIN
+      diff_interval = end_t - start_t;
+  
+      diff = DATE_PART('day', diff_interval);
+  
+      RETURN diff;
+ END;
+ $$ LANGUAGE plpgsql;
+ 
+    select DateDiff('2016-09-20', '2016-09-30');
+ 
+ ------letra d 1-------
+--controlar para que um usuário não faça empréstimo de mais de 3 livros;
+ 
+ create or replace function limiteEmprestimo()
+ returns trigger as
+ $$
+ declare
+ 	_number integer;
+ begin
+ 	
+ 	SELECT count(*) into _number
+ 	from emprestimo
+ 	where idUsuario = new.idUsuario;
+ 	
+ 	IF _number < 3 then
+ 		return NEW;
+ 	end IF;
+ 
+ 	return NULL;
+ 	
+ end;
+ $$language plpgsql;
+ 
+ create trigger trg_limiteEmprestimo before insert on emprestimo
+ for each row execute procedure limiteEmprestimo();
+ 
+ ------letra d 2----------
+ --a exclusão de um empréstimo significa que o mesmo se encerrou.
+ --Para que a informação sobre o empréstimo não seja perdida
+ --deve ser produzida uma entrada na tabela Histórico.
+ --Não esqueça de preencher os dias em atraso.
+ --Caso o empréstimo tenha se encerrado no prazo,
+ --preencher DiasAtraso com um número negativo ou zero.
+ create or replace function atualizaHistorico()
+ returns trigger as
+ $$
+ declare
+ 	_diasEmprestimo integer;
+ 	_dataRetirada date;
+ 	_dataAtual date;
+ 	_diasAtraso integer = 0;
+ begin
+	SELECT CURRENT_DATE into _dataAtual;
+	raise notice 'dataAtual: %', _dataAtual;
+ 	select DateDiff(OLD.DataRetirada, _dataAtual) into _diasEmprestimo;
+ 	raise notice 'Dias: %', _diasEmprestimo;
 
-CREATE TABLE EMPRESTIMO (
-	idUsuario integer NOT NULL,
-	idLivro integer NOT NULL,
-	DataRetirada date NOT NULL
-);
+	IF _diasEmprestimo > 15 THEN
+		_diasAtraso = _diasEmprestimo - 15;
+	END IF;
+	--_dataRetirada = to_timestamp(_dateValue);
+ 		
+ 	INSERT INTO HISTORICO (idUsuario, idLivro, DataDevolucao, DiasAtraso)
+ 	VALUES (OLD.idUsuario, OLD.idLivro, _dataAtual, _diasAtraso);
+ 	
+ 	return OLD;
+ 	
+ end;
+ $$language plpgsql;
+
+ 
+ create trigger trg_atualizaHistorico before delete on emprestimo
+ for each row execute procedure atualizaHistorico();
+ 
+ -------letra c----------
+--Construa um procedimento que apresente a lista de empréstimos
+--atualmente em atraso (considere a data atual para calcular o atraso)
+ CREATE OR REPLACE FUNCTION ListaAtraso () 
+ RETURNS table (usuario varchar, titulo varchar, dataRet date) AS $$
+ declare
+	_dataAtual date;
+	_dataLimite date;
+ BEGIN
+	
+	SELECT CURRENT_DATE into _dataAtual;
+
+	_dataLimite = _dataAtual - 15;
+      return query
+	
+	SELECT usuario.nome,livro.titulo,dataRetirada
+	FROM emprestimo
+	INNER JOIN usuario ON emprestimo.idUsuario = usuario.idUsuario
+	INNER JOIN livro ON emprestimo.idLivro = livro.idLivro
+	Where dataretirada <= _dataLimite;
+  
+      RETURN;
+ END;
+ $$ LANGUAGE plpgsql;
+
+select ListaAtraso();
+ 
+
+ -------letra a----------
+--Construa uma visão que, para cada usuário, apresente seu nome,
+--quantidade de livros em seu poder no momento,
+--quantidade de livros devolvidos no prazo e
+--quantidade de livros devolvidos com atraso;
+
+create or replace view HistoricoGeral(Nome,QtdeLivrosEmPoder,QtdeLivrosDevolvidosPrazo, QtdeLivrosDevolvidosAtraso)as
+SELECT DISTINCT usuario.nome, t1.livrosPoder, t2.devolvidosPrazo, t3.devolvidosAtraso
+FROM usuario
+LEFT JOIN (Select idUsuario,Count(idUsuario) AS livrosPoder
+		from emprestimo
+		group by idUsuario) t1
+ON usuario.idUsuario = t1.idUsuario
+LEFT JOIN (Select idUsuario,Count(idUsuario) AS devolvidosPrazo
+		from historico
+		group by idUsuario, diasatraso
+		having diasatraso = 0) t2
+ON usuario.idUsuario = t2.idUsuario
+LEFT JOIN (Select idUsuario,Count(idUsuario) AS devolvidosAtraso
+		from historico
+		group by idUsuario, diasatraso
+		having diasatraso > 0) t3
+ON usuario.idUsuario = t3.idUsuario
+--ORDER BY usuario.idUsuario;
+
+select * from HistoricoGeral order by nome
+
+delete from emprestimo
 
 INSERT INTO EMPRESTIMO (idUsuario, idLivro, DataRetirada) VALUES
-(2, 5, '2016-09-01'),
-(6, 1, '2016-09-12'),
-(8, 3, '2016-09-03'),
-(9, 2, '2016-09-20'),
-(3, 4, '2016-09-21'),
-(5, 6, '2016-09-16'),
-(1, 9, '2016-09-14'),
-(2, 7, '2016-09-11'),
-(2, 8, '2016-09-20');
-
-CREATE TABLE HISTORICO (
-	idHistorico integer NOT NULL,
-	idUsuario integer NOT NULL,
-	idLivro integer NOT NULL,
-	DataDevolucao date NOT NULL,
-	DiasAtraso date NOT NULL,
-	CONSTRAINT pk_idHistorico PRIMARY KEY (idHistorico);
-);
-
-ALTER TABLE EMPRESTIMO
-ADD CONSTRAINT fk_emprestimo_usuario FOREIGN KEY (idUsuario)
-REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
-ADD CONSTRAINT fk_emprestimo_livro FOREIGN KEY (idLivro)
-REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
-
-ALTER TABLE HISTORICO
-ADD CONSTRAINT fk_historico_usuario FOREIGN KEY (idUsuario)
-REFERENCES USUARIO (idUsuario) ON UPDATE CASCADE ON DELETE NO ACTION,
-ADD CONSTRAINT fk_historico_livro FOREIGN KEY (idLivro)
-REFERENCES LIVRO (idLivro) ON UPDATE CASCADE ON DELETE NO ACTION;
-
-------letra b-------
-
-CREATE OR REPLACE FUNCTION DateDiff (start_t TIMESTAMP, end_t TIMESTAMP) 
-RETURNS INT AS $$
-DECLARE
-     diff_interval INTERVAL; 
-     diff INT = 0;
-BEGIN
-     diff_interval = end_t - start_t;
- 
-     diff = diff + DATE_PART('day', diff_interval);
- 
-     RETURN diff;
-END;
-$$ LANGUAGE plpgsql;
-
-   select DateDiff('2016-09-01', '2016-07-01');
-
-------letra d 1-------
-
-
-create or replace function limiteEmprestimo()
-returns trigger as
-$$
-declare
-	_number integer;
-begin
-	
-	SELECT count(*) into _number
-	from emprestimo
-	where idUsuario = new.idUsuario;
-	
-	IF _number < 3 then
-		return NEW;
-	end IF;
-
-	return NULL;
-	
-end;
-$$language plpgsql;
-
-create trigger trg_limiteEmprestimo before insert on emprestimo
-for each row execute procedure limiteEmprestimo();
-
-------letra d 2----------
-
-create or replace function atualizaHistorico()
-returns trigger as
-$$
-declare
-	_dateValue integer;
-begin
-	select DateDiff(New.DataRetirada, NOW()) into _dateValue;
+ (2, 8, '2016-09-30');
 		
-	INSERT INTO HISTORICO (idUsuario, idLivro, DataDevolucao, DiasAtraso)
-	VALUES (New.idUsuario, New.idLivro, NOW(), _dateValue);
-	
-	return NEW;
-	
-end;
-$$language plpgsql;
+--livros emprestimos
+--Select idUsuario,Count(idUsuario) as Livros
+--from emprestimo
+--group by idUsuario
 
-create trigger trg_atualizaHistorico before delete on emprestimo
-for each row execute procedure atualizaHistorico();
+-- livros devolvidos prazo
+--Select idUsuario,Count(idUsuario)
+--from historico
+--group by idUsuario, diasatraso
+--having diasatraso = 0;
 
--------letra c----------
-CREATE OR REPLACE FUNCTION ListaAtraso () 
-RETURNS table (idUsuario integer, idLivro integer) AS $$
-
-BEGIN
-     return query
- 
-     RETURN diff;
-END;
-$$ LANGUAGE plpgsql;
-
-   select DateDiff('2016-09-01', '2016-07-01');
-
+-- livros devolvidos em atraso
+--Select idUsuario,Count(idUsuario)
+--from historico
+--group by idUsuario, diasatraso
+--having diasatraso > 0;
 
